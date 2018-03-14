@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 			totalItter = (int)argv[i + 1] * 60; 
 		}
 		if (argv[i] == "-sats" || argv[i] == "-s") {
-			// Set time in minutes
+			// Set number of satellites
 			numberSats = (int)argv[i + 1];
 		}
 	}
