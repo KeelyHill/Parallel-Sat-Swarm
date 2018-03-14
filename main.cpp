@@ -14,8 +14,6 @@ void update_satellite(satellite_t *sat);
 int main(int argc, char **argv) {
 	int numthreads = omp_get_num_threads();
 
-	printf("# Threads: %i\n", numthreads);
-
     #pragma omp parallel num_threads(5)
     {
         printf("Hello from %i of %i\n", omp_get_thread_num(), omp_get_num_threads());
@@ -28,6 +26,8 @@ int main(int argc, char **argv) {
 	satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
 	init_satellites(satellites, numberSats);
 
+    printf("Size of sat_t: %i\n", sizeof(satellite_t));
+
 	for (int curItter = 0; curItter<totalItter; curItter++) {
 
 		// printf("%f\n", satellites[0].trueAnomaly);
@@ -37,11 +37,15 @@ int main(int argc, char **argv) {
 			update_satellite(&satellites[i]);
 	}
 
-
 }
 
 void update_satellite(satellite_t *sat) {
-	sat->trueAnomaly += 0.5; // TODO increment by relavent amount, based on orbit paramss
+
+    int x = 3;
+    double y = 3.123/14;
+    double z = (x + y)/3.1415 * 42;
+
+	sat->trueAnomaly += 0.5; // TODO increment by relavent amount (calculate degree change based on R current pos in orbit)
 	sat->trueAnomaly = fmod(sat->trueAnomaly, 360.0);
 }
 
