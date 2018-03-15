@@ -18,7 +18,6 @@ int main(int argc, char **argv) {
     int numThreads = 2; // TODO set this with flag
 	int totalItter = 100 * 60; // total seconds to simulate
 	int numberSats = 2; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
-
     /*
     #pragma omp parallel num_threads(5)
     {
@@ -27,10 +26,10 @@ int main(int argc, char **argv) {
 	*/
 
     for (int i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-sats") == 0 || strcmp(argv[i], "-s") == 0) {
-			// Set number of satellites
-			char* numberSats = argv[i + 1];
-			printf("numberSats = %s\n", numberSats);
+		if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-T") == 0) {
+			// Set number of threads
+			char* numThreads = argv[i + 1];
+			printf("numThreads = %s\n", numThreads);
 		}
 		else if (strcmp(argv[i], "-time") == 0 || strcmp(argv[i], "-t") == 0) {
 			// Set time in minutes
