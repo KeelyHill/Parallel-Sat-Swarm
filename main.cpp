@@ -34,8 +34,7 @@ int main(int argc, char **argv) {
 			char* totalIterStr = argv[i + 1];
 			int totalIterNum = atoi(totalIterStr) * 60;
 			printf("totalItter = %i\n ", totalIterNum);			
-		}
-		
+		}	
 	}
 
 	int curItter = 0;
