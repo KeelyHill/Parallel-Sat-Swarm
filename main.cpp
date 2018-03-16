@@ -10,26 +10,22 @@
 
 #include "common.hpp"
 
-void update_satellite(satellite_t *sat);
+void update_satellite(satellite_t *sat, double delta_time);
 
 int main(int argc, char **argv) {
 
 	// Defaults with no params
-    int numThreads = 2; // TODO set this with flag
+    int numThreads = 2;
 	int totalItter = 100 * 60; // total seconds to simulate
 	int numberSats = 2; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
-    /*
-    #pragma omp parallel num_threads(5)
-    {
-        printf("Hello from %i of %i\n", omp_get_thread_num(), omp_get_num_threads());
-    }
-	*/
+
 
     for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-T") == 0) {
 			// Set number of threads
-			char* numThreads = argv[i + 1];
-			printf("numThreads = %s\n", numThreads);
+			char* numThreadsStr = argv[i + 1];
+            numThreads = atoi(numThreadsStr);
+			printf("numThreads = %d\n", numThreads);
 		}
 		else if (strcmp(argv[i], "-time") == 0 || strcmp(argv[i], "-t") == 0) {
 			// Set time in minutes
@@ -42,6 +38,13 @@ int main(int argc, char **argv) {
             return 0;
 		}
 	}
+
+
+    #pragma omp parallel num_threads(numThreads)
+    {
+        printf("Hello from %i of %i\n", omp_get_thread_num(), omp_get_num_threads());
+    }
+
 
     /** Simulating */
 
@@ -57,12 +60,12 @@ int main(int argc, char **argv) {
 		// printf("%f\n", satellites[1].trueAnomaly);
 
 		for (int i=0; i<numberSats; i++)
-			update_satellite(&satellites[i]);
+			update_satellite(&satellites[i], 1);
 	}
 
 }
 
-void update_satellite(satellite_t *sat) {
+void update_satellite(satellite_t *sat, double delta_time) {
 
     int x = 3;
     double y = 3.123/14;
