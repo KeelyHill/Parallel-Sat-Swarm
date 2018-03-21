@@ -96,9 +96,26 @@ a,e,i,rightAscension,argOfPerigee,trueAnomaly
 
 Ex: 25600, 0.6, 0,0,0, 130
 */
-satellite_t * loadCSVConfig(char * filename) {
+satellite_t * loadCSVConfig(char * fileName) {
     // satellite_t *satellites = (satellite_t*) malloc( numSats * sizeof(satellite_t) );
+	int satArray[6];
+	int deg = rad*180/math.pi;
+	fPointer = fopen(fileName, "r");
+	char singleLine[numSats];
+		
+	int i = 0;
+	int numSatStart = 0;
+	while(!feof(fPointer) && numSatStart < numSats){
+		i++;
+		if (i > 6){
+		i = 0;
+		}
+		numSats++;
+		satArray[i] = fgets(singleLine, numSats, fPointer);
+		puts(singleLine);
+	}
 
+	fclose(fPointer);
 }
 
 /* TODO Append new info of satellites to output file format. */
