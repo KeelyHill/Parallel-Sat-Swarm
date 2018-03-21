@@ -1,8 +1,17 @@
+/** common.hpp
+
+satellite_t struct and orbital mechanics math
+
+Orbital algorithms adapted from:
+https://github.com/RazerM/orbital/blob/master/orbital/utilities.py
+
+*/
+
 #include <math.h>
 #include <stdio.h>
 
-#ifndef COMMON_HPP
-#define COMMON_HPP
+#ifndef SATELLITE_HPP
+#define SATELLITE_HPP
 
 #define degToRad(angleInDegrees) ((angleInDegrees) * M_PI / 180.0)
 #define radToDeg(angleInRadians) ((angleInRadians) * 180.0 / M_PI)

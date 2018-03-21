@@ -8,7 +8,7 @@
 #include <math.h>
 #include "omp.h"
 
-#include "common.hpp"
+#include "satellite.hpp"
 
 #define DELTA_TIME 1
             // seconds
