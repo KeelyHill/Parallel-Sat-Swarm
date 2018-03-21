@@ -87,6 +87,18 @@ void update_satellite(satellite_t *sat, double delta_time) {
     sat->trueAnomaly = sat->mean_to_true_anoml(mean_anoml); // new true anomaly
 }
 
+/** TODO
+Given a file name, load a satellite_t * array.
+
+Plain CSV Format, angle values in deg converted to rad (the satellite_t struct):
+a,e,i,rightAscension,argOfPerigee,trueAnomaly
+
+Ex: 25600, 0.6, 0,0,0, 130
+*/
+satellite_t * loadCSVConfig(char * filename) {
+    // satellite_t *satellites = (satellite_t*) malloc( numSats * sizeof(satellite_t) );
+
+}
 
 /* TODO Append new info of satellites to output file format. */
 void logStep(FILE *f, satellite_t *satellites) {
