@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
 
     for (int i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-T") == 0) {
+		if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-n") == 0) {
 			// Set number of threads
 			char* numThreadsStr = argv[i + 1];
             numThreads = atoi(numThreadsStr);
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 			printf("totalItter = %i\n ", totalItter);
 		}
         else if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0) { // help string
-		    printf("\nUsage: ./main [-time t] [-sats s]\n\n");
+		    printf("\nUsage: ./main [-time t] [-threads n]\n\n");
             return 0;
 		}
 	}
