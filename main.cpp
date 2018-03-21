@@ -10,15 +10,17 @@
 
 #include "common.hpp"
 
+#define DELTA_TIME 1
+            // seconds
+
 void update_satellite(satellite_t *sat, double delta_time);
 
 int main(int argc, char **argv) {
 
 	// Defaults with no params
     int numThreads = 2;
-	int totalItter = 100 * 60; // total seconds to simulate
-	int numberSats = 2; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
-
+	int totalItter = 12 * 60 * 60; // total seconds to simulate
+	int numberSats = 300; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
 
     for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-n") == 0) {
@@ -45,34 +47,44 @@ int main(int argc, char **argv) {
         printf("Hello from %i of %i\n", omp_get_thread_num(), omp_get_num_threads());
     }
 
+    printf("Size of sat_t: %lu\n", sizeof(satellite_t));
 
     /** Simulating */
+
+    printf("** Initing Sats **\n");
 
 	satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
 	init_satellites(satellites, numberSats);
 
-    printf("Size of sat_t: %lu\n", sizeof(satellite_t));
+    printf("** Starting Simulation **\n");
 
     int curItter = 0;
 	for (int curItter = 0; curItter<totalItter; curItter++) {
 
-		// printf("%f\n", satellites[0].trueAnomaly);
-		// printf("%f\n", satellites[1].trueAnomaly);
+        satellite_t asat = satellites[0];
+        double radius_at_f = (asat.a * (1 - asat.e * asat.e)) / (1 + asat.e * cos(asat.trueAnomaly));
+        double vel = sqrt(EARTH_G * (2/radius_at_f - 1/asat.a));
+		printf("tick: %i  sat1-f: %f deg  vel: %.4f Km/s   dist_trav: %.1f m\n", curItter, radToDegPos(asat.trueAnomaly), vel, vel * DELTA_TIME * 1000);
 
-		for (int i=0; i<numberSats; i++)
-			update_satellite(&satellites[i], 1);
+		for(int i=0; i<numberSats; i++)
+			update_satellite(&satellites[i], DELTA_TIME);
 	}
+
+
+    printf("** End Simulation ** took xx sec.\n"); // TODO time since start
 
 }
 
 void update_satellite(satellite_t *sat, double delta_time) {
+    double mean_anoml = sat->true_to_mean_anoml(); // M_0
 
-    int x = 3;
-    double y = 3.123/14;
-    double z = (x + y)/3.1415 * 42;
+    // printf("true: %f == %f\n", sat->trueAnomaly, radToDegPos(sat->trueAnomaly));
+    // printf("mean motion: %f mean anoml: %f\n", sat->calc_mean_motion(), mean_anoml);
 
-	sat->trueAnomaly += 0.5; // TODO increment by relavent amount (calculate degree change based on R current pos in orbit)
-	sat->trueAnomaly = fmod(sat->trueAnomaly, 360.0);
+    // M_1 = M_0 + mean_motion + delta-t(s)
+    mean_anoml += sat->calc_mean_motion() * delta_time;
+
+    sat->trueAnomaly = sat->mean_to_true_anoml(mean_anoml); // new true anomaly
 }
 
 
