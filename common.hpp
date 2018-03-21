@@ -7,12 +7,12 @@
 
 /** */
 typedef struct {
-	double a;
-	double e;
-	double i;
+	double a; // semimajor axis
+	double e; // eccentricity
+	double i; // Inclination
 	double rightAscension;
-	double someOtherAngel;
-	double trueAnomaly; // Angle from perigee to the spacecraft’s position
+	double argOfPerigee; // Argument of perigee
+	double trueAnomaly; // [+/- rad] : Angle from perigee to the spacecraft’s position
 
 	// this does not change with time, based only on semi-major axis (a)
 	double calc_mean_motion() {
@@ -55,7 +55,14 @@ typedef struct {
 /** */
 void init_satellites(satellite_t *sats, int n) {
 	for (int i = 0; i<n; i++) {
-		sats[i].trueAnomaly = 0;
+		sats[i].trueAnomaly = degToRad(5); // aka: `f`
+
+		sats[i].a = 25600; //Km
+		sats[i].e = 0.6;
+		sats[i].i = 0;
+		sats[i].rightAscension = 0;
+		sats[i].argOfPerigee = 0;
+
 	}
 }
 
