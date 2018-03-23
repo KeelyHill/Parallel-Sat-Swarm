@@ -18,6 +18,7 @@ https://github.com/RazerM/orbital/blob/master/orbital/utilities.py
 #define radToDegPos(angleInRadians) fmod((((angleInRadians) * 180.0 / M_PI) + 360), 360)
 
 #define EARTH_G 398600.4418
+#define EARTH_RADIUS 6371  // Km
 #define MAX_ITERATIONS 100
 
 /** */
@@ -164,6 +165,31 @@ void random_init_satellites(satellite_t *sats, int n) {
 	}
 }
 
+/** TODO
+
+*/
+bool lineIntersectsSphere(double &x1, double &y1, double &z1, double &x2, double &y2, double &z2, double radius) {
+
+	// TODO the two 3-d-points are a line, EARTH_RADIUS sphere at origin. Return "does line interesect?"
+
+
+}
+
+
+/**
+
+TODO shrink sphere to model atmosphere bouncing
+TODO docstring
+
+*/
+bool satellitesHaveLineOfSight(satellite_t *one, satellite_t *two) {
+	double x1_eci, y1_eci, z1_eci;
+	double x2_eci, y2_eci, z2_eci;
+	one->getECI_XYZ(x1_eci, y1_eci, z1_eci);
+	two->getECI_XYZ(x2_eci, y2_eci, z2_eci);
+
+	return !lineIntersectsSphere(x1_eci, y1_eci, z1_eci, x2_eci, y2_eci, z2_eci, EARTH_RADIUS);
+}
 
 
 #endif
