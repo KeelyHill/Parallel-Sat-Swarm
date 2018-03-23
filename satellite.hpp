@@ -107,6 +107,19 @@ void init_satellites(satellite_t *sats, int n) {
 	}
 }
 
+/** May want this, leaving as blank for now. */
+void random_init_satellites(satellite_t *sats, int n) {
+	for (int i = 0; i<n; i++) {
+		// sats[i].trueAnomaly = 0; // aka: `f`
+		//
+		// sats[i].a = 25600; //Km
+		// sats[i].e = 0.6;
+		// sats[i].i = 0;	// < 2pi rad
+		// sats[i].rightAscension = 0; // < 2pi rad
+		// sats[i].argOfPerigee = 0; // < 2pi rad
+	}
+}
+
 
 
 #endif
