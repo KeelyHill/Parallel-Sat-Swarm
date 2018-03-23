@@ -9,7 +9,9 @@
 #include "omp.h"
 
 #include "satellite.hpp"
+#include "common.hpp"
 
+#define FREQ_PERCENT_PRINT 0.1 // how often to print state of completion
 #define DELTA_TIME 1
             // seconds
 
@@ -52,27 +54,43 @@ int main(int argc, char **argv) {
 
     /** Simulating */
 
-    printf("** Initing Sats **\n");
+    printf("** Initing Sats ** %f\n", read_timer());
 
 	satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
 	init_satellites(satellites, numberSats);
 
-    printf("** Starting Simulation **\n");
+    printf("** Starting Simulation ** %f\n", read_timer());
 
-    int curItter = 0;
-	for (int curItter = 0; curItter<totalItter; curItter++) {
+    // #pragma omp parallel num_threads(numThreads)
+    // {
 
-        satellite_t asat = satellites[0];
-        double radius_at_f = (asat.a * (1 - asat.e * asat.e)) / (1 + asat.e * cos(asat.trueAnomaly));
-        double vel = sqrt(EARTH_G * (2/radius_at_f - 1/asat.a));
-		printf("tick: %i  sat1-f: %f deg  vel: %.4f Km/s   dist_trav: %.1f m\n", curItter, radToDegPos(asat.trueAnomaly), vel, vel * DELTA_TIME * 1000);
+        /* Update satellite orbital positions */
 
-		for(int i=0; i<numberSats; i++)
-			update_satellite(&satellites[i], DELTA_TIME);
-	}
+        int freqPercentCount = (float)totalItter * FREQ_PERCENT_PRINT;
+
+        int curItter = 0;
+    	for (int curItter = 0; curItter<totalItter; curItter++) {
+
+            satellite_t asat = satellites[0];
+            double radius_at_f = (asat.a * (1 - asat.e * asat.e)) / (1 + asat.e * cos(asat.trueAnomaly));
+            double vel = sqrt(EARTH_G * (2/radius_at_f - 1/asat.a));
+    		// printf("tick: %i  sat1-f: %f deg  vel: %.4f Km/s   dist_trav: %.1f m\n", curItter, radToDegPos(asat.trueAnomaly), vel, vel * DELTA_TIME * 1000);
+
+            #pragma omp parallel for num_threads(numThreads)
+    		for(int i=0; i<numberSats; i++) {
+    			update_satellite(&satellites[i], DELTA_TIME);
+                // printf("Hello from %i of %i\n", omp_get_thread_num(), omp_get_num_threads());
+            }
+
+            #pragma omp master
+            if (curItter % freqPercentCount == 0) {
+                printf("| %i%%\n", (int)(curItter/(float)totalItter * 100));
+            }
+        }
+    // }
 
 
-    printf("** End Simulation ** took xx sec.\n"); // TODO time since start
+    printf("** End Simulation ** took %f sec.\n", read_timer());
 
 }
 
