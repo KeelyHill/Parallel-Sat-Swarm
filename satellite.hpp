@@ -25,8 +25,8 @@ typedef struct {
 	double a; // semimajor axis
 	double e; // eccentricity
 	double i; // Inclination
-	double rightAscension;
-	double argOfPerigee; // Argument of perigee
+	double rAscen; // Ω
+	double argPeri; // Argument of perigee ω
 	double trueAnomaly; // [+/- rad] : Angle from perigee to the spacecraft’s position
 
 	// this does not change with time, based only on semi-major axis (a)
@@ -90,6 +90,50 @@ typedef struct {
 		return E;
 	}
 
+	/** */
+	void getECI_XYZ(double &ret_x, double &ret_y, double &ret_z) {
+
+		static bool hasRunOnce = false; // static, so stays true after geneating R-matrix
+
+		double * f = &this->trueAnomaly;
+		double radius_at_f = (this->a * (1 - this->e * this->e)) / (1 + this->e * cos(*f));
+		// double vel = sqrt(EARTH_G * (2/radius_at_f - 1/this->a));
+
+		// http://control.asu.edu/Classes/MAE462/462Lecture07.pdf
+		double r_x_peri = radius_at_f * cos(*f);
+		double r_y_peri = radius_at_f * sin(*f);
+		double r_z_peri = 0;
+
+		static double sinsinomeg = sin(this->rAscen) * sin(this->argPeri);  // sin(Ω) * sin(ω)
+		static double coscosomeg = cos(this->rAscen) * cos(this->argPeri);  // cos(Ω) * cos(ω)
+		static double sincosomeg = sin(this->rAscen) * cos(this->argPeri);  // sin(Ω) * cos(ω)
+		static double cossinomeg = cos(this->rAscen) * sin(this->argPeri);  // cos(Ω) * sin(ω)
+		static double sin_i = sin(this->i);
+		static double cos_i = cos(this->i);
+
+		static double R[3][3]; // R[row][col] - Perifocal to ECI transformation matrix
+
+		if (hasRunOnce == false) {
+			hasRunOnce = true; // generates R when first run, based on constant orbital params
+
+			R[0][0] = coscosomeg - sinsinomeg * cos_i;
+			R[0][1] = -cossinomeg - sincosomeg * cos_i;
+			R[0][2] = sin(this->rAscen) * sin_i;
+
+			R[1][0] = sincosomeg + cossinomeg * cos_i;
+			R[1][1] = -sinsinomeg + coscosomeg * cos_i;
+			R[1][2] = -cos(this->rAscen) * sin_i;
+
+			R[2][0] = sin(this->argPeri) * sin_i;
+			R[2][1] = cos(this->argPeri) * sin_i;
+			R[2][2] = cos_i;
+		}
+
+		ret_x = r_x_peri * R[0][0] + r_y_peri * R[0][1] + r_z_peri * R[0][2];
+		ret_y = r_x_peri * R[1][0] + r_y_peri * R[1][1] + r_z_peri * R[1][2];
+		ret_z = r_x_peri * R[2][0] + r_y_peri * R[2][1] + r_z_peri * R[2][2];
+	}
+
 } satellite_t;
 
 
@@ -101,8 +145,8 @@ void init_satellites(satellite_t *sats, int n) {
 		sats[i].a = 25600; //Km
 		sats[i].e = 0.6;
 		sats[i].i = 0;
-		sats[i].rightAscension = 0;
-		sats[i].argOfPerigee = 0;
+		sats[i].rAscen = 0;
+		sats[i].argPeri = 0;
 
 	}
 }
@@ -115,7 +159,7 @@ void random_init_satellites(satellite_t *sats, int n) {
 		// sats[i].a = 25600; //Km
 		// sats[i].e = 0.6;
 		// sats[i].i = 0;	// < 2pi rad
-		// sats[i].rightAscension = 0; // < 2pi rad
+		// sats[i].rAscen = 0; // < 2pi rad
 		// sats[i].argOfPerigee = 0; // < 2pi rad
 	}
 }

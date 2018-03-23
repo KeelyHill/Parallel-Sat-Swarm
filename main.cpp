@@ -72,8 +72,11 @@ int main(int argc, char **argv) {
     	for (int curItter = 0; curItter<totalItter; curItter++) {
 
             satellite_t asat = satellites[0];
-            double radius_at_f = (asat.a * (1 - asat.e * asat.e)) / (1 + asat.e * cos(asat.trueAnomaly));
-            double vel = sqrt(EARTH_G * (2/radius_at_f - 1/asat.a));
+
+            double x_eci, y_eci, z_eci;
+            asat.getECI_XYZ(x_eci, y_eci, z_eci);
+            // printf("%0.2f, %0.2f, %0.2f\n", x_eci,y_eci,z_eci);
+
     		// printf("tick: %i  sat1-f: %f deg  vel: %.4f Km/s   dist_trav: %.1f m\n", curItter, radToDegPos(asat.trueAnomaly), vel, vel * DELTA_TIME * 1000);
 
             #pragma omp parallel for num_threads(numThreads)
