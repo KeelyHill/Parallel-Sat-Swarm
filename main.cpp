@@ -21,7 +21,7 @@ satellite_t * loadCSVConfig(char * filename);
 int main(int argc, char **argv) {
 
 	// Defaults with no params
-    int numThreads = 2;
+    int numThreads = 0; // 0 default is automatic optimal (OpenMP)
 	int totalItter = 12 * 60 * 60; // total seconds to simulate
 	int numberSats = 300; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
 
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 			printf("totalItter = %i\n ", totalItter);
 		}
         else if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0) { // help string
-		    printf("\nUsage: ./main [-time t] [-threads n]\n\n");
+		    printf("\nUsage: ./main [-time t] [-threads n (default is optimum)]\n\n");
             return 0;
 		}
 	}
@@ -106,7 +106,7 @@ void update_satellite(satellite_t *sat, double delta_time) {
     sat->trueAnomaly = sat->mean_to_true_anoml(mean_anoml); // new true anomaly
 }
 
-/** TODO
+/** TODO Write it and move to common.hpp
 Given a file name, load a satellite_t * array.
 
 Plain CSV Format, angle values in deg converted to rad (the satellite_t struct):
