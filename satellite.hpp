@@ -19,6 +19,7 @@ https://github.com/RazerM/orbital/blob/master/orbital/utilities.py
 
 #define EARTH_G 398600.4418
 #define EARTH_RADIUS 6371  // Km
+#define EARTH_RADIUS_SQUARED 40589641  // Km
 #define MAX_ITERATIONS 100
 
 /** */
@@ -165,14 +166,23 @@ void random_init_satellites(satellite_t *sats, int n) {
 	}
 }
 
-/** TODO
+/** Returns true if the line (given by 2, 3D points) intersects a sphere with radius.
+False if line never intersects or touches.
 
+Must square the radius before calling (for better usage of immediates and macros).
 */
-bool lineIntersectsSphere(double &x1, double &y1, double &z1, double &x2, double &y2, double &z2, double radius) {
+bool lineIntersectsSphere(double &x1, double &y1, double &z1, double &x2, double &y2, double &z2, double radius_squared) {
+	double dx = x2 - x1;
+	double dy = y2 - y1;
+	double dz = z2 - z1;
 
-	// TODO the two 3-d-points are a line, EARTH_RADIUS sphere at origin. Return "does line interesect?"
+	// quadratic components
+	double a = dx*dx + dy*dy + dz*dz;
+	double b = 2 * (dx*x1 + dy*y1 + dz*z1);
+	double c = (x1*x1 + y1*y1 + z1*z1) - radius_squared;
 
-
+	double determinant = (b*b) - 4 * a * c;
+	return determinant >= 0; // intersects if determinant >= 0
 }
 
 
@@ -188,7 +198,7 @@ bool satellitesHaveLineOfSight(satellite_t *one, satellite_t *two) {
 	one->getECI_XYZ(x1_eci, y1_eci, z1_eci);
 	two->getECI_XYZ(x2_eci, y2_eci, z2_eci);
 
-	return !lineIntersectsSphere(x1_eci, y1_eci, z1_eci, x2_eci, y2_eci, z2_eci, EARTH_RADIUS);
+	return !lineIntersectsSphere(x1_eci, y1_eci, z1_eci, x2_eci, y2_eci, z2_eci, EARTH_RADIUS_SQUARED);
 }
 
 

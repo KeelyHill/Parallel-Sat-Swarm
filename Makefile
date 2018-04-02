@@ -17,4 +17,7 @@ build:
 	$(CC) $(OPENMP) $(LDFLAGS) -o main.out main.cpp
 
 clean:
-	rm -f main.out
+	rm -f main.out test.out
+
+test:
+	$(CC) -o test.out test.cpp && ./test.out
