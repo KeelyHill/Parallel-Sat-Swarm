@@ -16,9 +16,26 @@
             // seconds
 
 void update_satellite(satellite_t *sat, double delta_time);
-satellite_t * loadCSVConfig(char * filename);
+//satellite_t * loadCSVConfig(char * filename);
 
 int main(int argc, char **argv) {
+	// LOAD IN CSV
+	FILE* stream = fopen("input.txt", "r");
+	
+	char line[1024];
+	while (fgets(line, 1024, stream))
+	{
+		char* tmp = strdup(line);
+		printf("Field 1 would be %s\n", loadCSVConfig(tmp, 1));
+		printf("Field 2 would be %s\n", loadCSVConfig(tmp, 2));
+		printf("Field 3 would be %s\n", loadCSVConfig(tmp, 3));
+		printf("Field 4 would be %s\n", loadCSVConfig(tmp, 4));
+		printf("Field 5 would be %s\n", loadCSVConfig(tmp, 5));
+		printf("Field 6 would be %s\n", loadCSVConfig(tmp, 6));
+		// NOTE strtok clobbers tmp
+		free(tmp);
+	}
+
 
 	// Defaults with no params
     int numThreads = 0; // 0 default is automatic optimal (OpenMP)
@@ -107,36 +124,6 @@ void update_satellite(satellite_t *sat, double delta_time) {
     mean_anoml += sat->calc_mean_motion() * delta_time;
 
     sat->trueAnomaly = sat->mean_to_true_anoml(mean_anoml); // new true anomaly
-}
-
-/** TODO Write it and move to common.hpp
-Given a file name, load a satellite_t * array.
-
-Plain CSV Format, angle values in deg converted to rad (the satellite_t struct):
-a,e,i,rightAscension,argOfPerigee,trueAnomaly
-
-Ex: 25600, 0.6, 0,0,0, 130
-*/
-satellite_t * loadCSVConfig(char * fileName) {
-    // satellite_t *satellites = (satellite_t*) malloc( numSats * sizeof(satellite_t) );
-	int satArray[6];
-	int deg = rad*180/math.pi;
-	fPointer = fopen(fileName, "r");
-	char singleLine[numSats];
-		
-	int i = 0;
-	int numSatStart = 0;
-	while(!feof(fPointer) && numSatStart < numSats){
-		i++;
-		if (i > 6){
-		i = 0;
-		}
-		numSats++;
-		satArray[i] = fgets(singleLine, numSats, fPointer);
-		puts(singleLine);
-	}
-
-	fclose(fPointer);
 }
 
 /* TODO Append new info of satellites to output file format. */
