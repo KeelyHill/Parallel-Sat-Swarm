@@ -131,7 +131,11 @@ void logStep(FILE *f, satellite_t *satellites) {
 
 	// 'cur time' should be logged
 
-	// Crital anamoly is the only thing that changes in relation to the spacecrafts orbit
+	// true anamoly is the only thing that changes in relation to the spacecrafts orbit
 	// (i.e. dont write all the other stuff unless it changes tick-to-tick)
+
+	/* For now i think:
+		tick, sat_id, true anamoly, x, y, z
+	*/
 
 }
