@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
+#include <string>
 
 #include "satellite.hpp"
 
@@ -19,46 +20,57 @@ double read_timer() {
     return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
 }
 
-/** TODO Write it and move to common.hpp
-Given a file name, load a satellite_t * array.
+
+/** Given a file name, parse, malloc, and return a satellite_t * array.
 
 Plain CSV Format, angle values in deg converted to rad (the satellite_t struct):
-a,e,i,rightAscension,argOfPerigee,trueAnomaly
+a,e,i,rAscen,argPeri,trueAnomaly
 
 Ex: 25600, 0.6, 0,0,0, 130
+
+Will Segmentation Fault if a line does not conform to the format.
+
+Do not parallelize!
 */
-//satellite_t * loadCSVConfig(char * fileName) {
-const char* loadCSVConfig(char* line, int num) {
-	const char* tok;
-	for (tok = strtok(line, ";");
-		tok && *tok;
-		tok = strtok(NULL, ";\n"))
-	{
-		if (!--num)
-			return tok;
-	}
-	return NULL;
-	/*
-	// satellite_t *satellites = (satellite_t*) malloc( numSats * sizeof(satellite_t) );
-	int satArray[6];
-	int deg = rad*180/math.pi;
-	fPointer = fopen(fileName, "r");
-	char singleLine[numSats];
+satellite_t * loadCSVConfig(const char * fileName) {
+    unsigned int number_of_lines = 0;
+    FILE *infile = fopen(fileName, "r");
 
-	int i = 0;
-	int numSatStart = 0;
-	while(!feof(fPointer) && numSatStart < numSats){
-	i++;
-	if (i > 6){
-	i = 0;
-	}
-	numSats++;
-	satArray[i] = fgets(singleLine, numSats, fPointer);
-	puts(singleLine);
+    int ch;
+    // count number of line to init satillites array
+    while (EOF != (ch=getc(infile)))
+        if ('\n' == ch)
+            ++number_of_lines;
+
+    // init array
+    satellite_t *satellites = (satellite_t*) malloc( number_of_lines * sizeof(satellite_t) );
+
+    rewind(infile); // go to start of file (now that we've counted the lines)
+
+    unsigned int line_num = 0;
+    char line[1024];
+	while (fgets(line, 1024, infile)) { // read line by line
+
+        // grab & convert each comma separated value
+        char *pt;
+
+        pt = strtok (line, ",");
+        satellites[line_num].a = atof(pt);
+        pt = strtok (NULL, ",");
+        satellites[line_num].e = atof(pt);
+        pt = strtok (NULL, ",");
+        satellites[line_num].i = degToRad(atof(pt));
+        pt = strtok (NULL, ",");
+        satellites[line_num].rAscen = degToRad(atof(pt));
+        pt = strtok (NULL, ",");
+        satellites[line_num].argPeri = degToRad(atof(pt));
+        pt = strtok (NULL, ",");
+        satellites[line_num].trueAnomaly = degToRad(atof(pt));
+
+        line_num++; // next array index
 	}
 
-	fclose(fPointer);
-	*/
+    return satellites;
 }
 
 void save( FILE *f, int num_sats, satellite_t *sats){

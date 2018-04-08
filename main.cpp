@@ -21,21 +21,6 @@ void update_satellite(satellite_t *sat, double delta_time);
 int main(int argc, char **argv) {
 	// LOAD IN CSV
 	FILE* stream = fopen("input.txt", "r");
-	
-	char line[1024];
-	while (fgets(line, 1024, stream))
-	{
-		char* tmp = strdup(line);
-		printf("Field 1 would be %s\n", loadCSVConfig(tmp, 1));
-		printf("Field 2 would be %s\n", loadCSVConfig(tmp, 2));
-		printf("Field 3 would be %s\n", loadCSVConfig(tmp, 3));
-		printf("Field 4 would be %s\n", loadCSVConfig(tmp, 4));
-		printf("Field 5 would be %s\n", loadCSVConfig(tmp, 5));
-		printf("Field 6 would be %s\n", loadCSVConfig(tmp, 6));
-		// NOTE strtok clobbers tmp
-		free(tmp);
-	}
-
 
 	// Defaults with no params
     int numThreads = 0; // 0 default is automatic optimal (OpenMP)
@@ -62,19 +47,20 @@ int main(int argc, char **argv) {
 	}
 
 
-    #pragma omp parallel num_threads(numThreads)
-    {
-        printf("Hello from %i of %i\n", omp_get_thread_num(), omp_get_num_threads());
-    }
+	/* Initing */
 
-    printf("Size of sat_t: %lu\n", sizeof(satellite_t));
+	// printf("Size of sat_t: %lu\n", sizeof(satellite_t));
+	printf("** Initing Sats ** %f\n", read_timer());
+
+	const char * input_file_name = "input.txt";  // TODO input filename as cmd line argument
+	satellite_t *satellites = loadCSVConfig(input_file_name);
+
+	// satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
+	// init_satellites(satellites, numberSats);
 
     /** Simulating */
 
-    printf("** Initing Sats ** %f\n", read_timer());
 
-	satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
-	init_satellites(satellites, numberSats);
 
     printf("** Starting Simulation ** %f\n", read_timer());
 
@@ -109,6 +95,7 @@ int main(int argc, char **argv) {
         }
     // }
 
+	free(satellites);
 
     printf("** End Simulation ** took %f sec.\n", read_timer());
 
