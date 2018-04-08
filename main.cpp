@@ -16,6 +16,7 @@
             // seconds
 
 void update_satellite(satellite_t *sat, double delta_time);
+void logStep();
 //satellite_t * loadCSVConfig(char * filename);
 
 int main(int argc, char **argv) {
@@ -46,17 +47,18 @@ int main(int argc, char **argv) {
 		}
 	}
 
+        logStep();
 
 	/* Initing */
 
 	// printf("Size of sat_t: %lu\n", sizeof(satellite_t));
 	printf("** Initing Sats ** %f\n", read_timer());
 
-	const char * input_file_name = "input.txt";  // TODO input filename as cmd line argument
-	satellite_t *satellites = loadCSVConfig(input_file_name);
+//	const char * input_file_name = "input.txt";  // TODO input filename as cmd line argument
+//	satellite_t *satellites = loadCSVConfig(input_file_name);
 
-	// satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
-	// init_satellites(satellites, numberSats);
+	satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
+	init_satellites(satellites, numberSats);
 
     /** Simulating */
 
@@ -114,7 +116,8 @@ void update_satellite(satellite_t *sat, double delta_time) {
 }
 
 /* TODO Append new info of satellites to output file format. */
-void logStep(FILE *f, satellite_t *satellites) {
+//void logStep(FILE *f, satellite_t *satellites) {
+void logStep() {
 
 	// 'cur time' should be logged
 
@@ -124,5 +127,18 @@ void logStep(FILE *f, satellite_t *satellites) {
 	/* For now i think:
 		tick, sat_id, true anamoly, x, y, z
 	*/
+    FILE *f;
+    int i;
+
+    f = fopen ("output.txt", "w");
+    if (f == NULL) {
+      f = fopen("output.txt", "wb");
+    }
+
+    for (i = 0; i < 10; i++){
+      fprintf (f, "This is line %d\n", i +1);
+    }
+
+    fclose(f);
 
 }
