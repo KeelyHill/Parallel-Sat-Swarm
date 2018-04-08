@@ -1,12 +1,12 @@
 
 
-#CC = /usr/local/opt/llvm/bin/clang++  # macOS CC (after `brew install llvm`)
-CC = /usr/bin/cc
+CC = /usr/local/opt/llvm/bin/clang++  # macOS CC (after `brew install llvm`)
+#CC = /usr/bin/cc
 
 OPENMP = -fopenmp
 CFLAGS = -O3
 
-#LDFLAGS="-L/usr/local/opt/llvm/lib" # needed for macOS
+LDFLAGS="-L/usr/local/opt/llvm/lib" # needed for macOS
 
 # CC = icpc
 # OPENMP = -qopenmp
