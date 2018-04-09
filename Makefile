@@ -16,7 +16,7 @@ LDFLAGS="-L/usr/local/opt/llvm/lib" # needed for macOS
 
 build:
 	$(CC) $(OPENMP) $(LDFLAGS) -o main.out main.cpp
-build-linux:
+linux:
 	g++ -lm -fno-threadsafe-statics common.hpp satellite.hpp -fopenmp -o main.out main.cpp
 clean:
 	rm -f main.out test.out output.txt

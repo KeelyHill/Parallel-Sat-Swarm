@@ -16,15 +16,22 @@
             // seconds
 
 void update_satellite(satellite_t *sat, double delta_time);
-void logStep();
+void logStep(FILE* f, satellite_t *sat, int satItter, double x_eci, double y_eci, double z_eci);
 //satellite_t * loadCSVConfig(char * filename);
 
 int main(int argc, char **argv) {
 	// LOAD IN CSV
 	FILE* stream = fopen("input.txt", "r");
+	FILE *f;
+
+        f = fopen ("output.txt", "w");
+        if (f == NULL) {
+          f = fopen("output.txt", "wb");
+        }
+
 
 	// Defaults with no params
-    int numThreads = 0; // 0 default is automatic optimal (OpenMP)
+	int numThreads = 0; // 0 default is automatic optimal (OpenMP)
 	int totalItter = 12 * 60 * 60; // total seconds to simulate
 	int numberSats = 300; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
 
@@ -47,7 +54,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-        logStep();
 
 	/* Initing */
 
@@ -86,21 +92,35 @@ int main(int argc, char **argv) {
 
             #pragma omp parallel for num_threads(numThreads)
     		for(int i=0; i<numberSats; i++) {
-    			update_satellite(&satellites[i], DELTA_TIME);
-                // printf("Hello from %i of %i\n", omp_get_thread_num(), omp_get_num_threads());
-            }
+		    update_satellite(&satellites[i], DELTA_TIME);
+//                    printf("Hello from %i of %i\n", omp_get_thread_num(), omp_get_num_threads());
+
+
+//    		for(int i=0; i<numberSats; i++) {
+		    if(curItter % freqPercentCount == 0) {
+ 	                satellites[i].getECI_XYZ(x_eci, y_eci, z_eci);
+    	                logStep(f, &satellites[i], i, x_eci, y_eci, z_eci);
+		    }
+//                }
+
+
+
+                }
 
             #pragma omp master
             if (curItter % freqPercentCount == 0) {
                 printf("| %i%%\n", (int)(curItter/(float)totalItter * 100));
+//    		for(int i=0; i<numberSats; i++) {
+//	            satellites[i].getECI_XYZ(x_eci, y_eci, z_eci);
+//    	            logStep(&satellites[i], i, x_eci, y_eci, z_eci);
+//                }
             }
         }
     // }
-
 	free(satellites);
 
     printf("** End Simulation ** took %f sec.\n", read_timer());
-
+    fclose(f);
 }
 
 void update_satellite(satellite_t *sat, double delta_time) {
@@ -117,7 +137,7 @@ void update_satellite(satellite_t *sat, double delta_time) {
 
 /* TODO Append new info of satellites to output file format. */
 //void logStep(FILE *f, satellite_t *satellites) {
-void logStep() {
+void logStep(FILE *f, satellite_t *sat, int satItter, double x_eci, double y_eci, double z_eci) {
 
 	// 'cur time' should be logged
 
@@ -127,18 +147,12 @@ void logStep() {
 	/* For now i think:
 		tick, sat_id, true anamoly, x, y, z
 	*/
-    FILE *f;
-    int i;
+//    int i;
 
-    f = fopen ("output.txt", "w");
-    if (f == NULL) {
-      f = fopen("output.txt", "wb");
-    }
+//    for (i = 0; i < 10; i++){
+//      fprintf (f, "This is line %d\n", i +1);
+//    }
 
-    for (i = 0; i < 10; i++){
-      fprintf (f, "This is line %d\n", i +1);
-    }
-
-    fclose(f);
+    fprintf(f, "Sat %d: tureAnomoly %0.2f, x %0.2f, y %0.2f, z %0.2f\n", satItter, sat->trueAnomaly, x_eci, y_eci, z_eci);
 
 }
