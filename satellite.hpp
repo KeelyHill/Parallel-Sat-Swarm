@@ -94,9 +94,6 @@ typedef struct {
 
 	/** */
 	void getECI_XYZ(double &ret_x, double &ret_y, double &ret_z) {
-
-		static bool hasRunOnce = false; // static, so stays true after geneating R-matrix
-
 		double * f = &this->trueAnomaly;
 		double radius_at_f = (this->a * (1 - this->e * this->e)) / (1 + this->e * cos(*f));
 		// double vel = sqrt(EARTH_G * (2/radius_at_f - 1/this->a));
@@ -106,30 +103,26 @@ typedef struct {
 		double r_y_peri = radius_at_f * sin(*f);
 		double r_z_peri = 0;
 
-		static double sinsinomeg = sin(this->rAscen) * sin(this->argPeri);  // sin(Ω) * sin(ω)
-		static double coscosomeg = cos(this->rAscen) * cos(this->argPeri);  // cos(Ω) * cos(ω)
-		static double sincosomeg = sin(this->rAscen) * cos(this->argPeri);  // sin(Ω) * cos(ω)
-		static double cossinomeg = cos(this->rAscen) * sin(this->argPeri);  // cos(Ω) * sin(ω)
-		static double sin_i = sin(this->i);
-		static double cos_i = cos(this->i);
+		double R[3][3]; // TODO, maybe ballance this with memory and memory access time
 
-		static double R[3][3]; // R[row][col] - Perifocal to ECI transformation matrix
+		double sinsinomeg = sin(this->rAscen) * sin(this->argPeri);  // sin(Ω) * sin(ω)
+		double coscosomeg = cos(this->rAscen) * cos(this->argPeri);  // cos(Ω) * cos(ω)
+		double sincosomeg = sin(this->rAscen) * cos(this->argPeri);  // sin(Ω) * cos(ω)
+		double cossinomeg = cos(this->rAscen) * sin(this->argPeri);  // cos(Ω) * sin(ω)
+		double sin_i = sin(this->i);
+		double cos_i = cos(this->i);
 
-		if (hasRunOnce == false) {
-			hasRunOnce = true; // generates R when first run, based on constant orbital params
+		R[0][0] = coscosomeg - sinsinomeg * cos_i;
+		R[0][1] = -cossinomeg - sincosomeg * cos_i;
+		R[0][2] = sin(this->rAscen) * sin_i;
 
-			R[0][0] = coscosomeg - sinsinomeg * cos_i;
-			R[0][1] = -cossinomeg - sincosomeg * cos_i;
-			R[0][2] = sin(this->rAscen) * sin_i;
+		R[1][0] = sincosomeg + cossinomeg * cos_i;
+		R[1][1] = -sinsinomeg + coscosomeg * cos_i;
+		R[1][2] = -cos(this->rAscen) * sin_i;
 
-			R[1][0] = sincosomeg + cossinomeg * cos_i;
-			R[1][1] = -sinsinomeg + coscosomeg * cos_i;
-			R[1][2] = -cos(this->rAscen) * sin_i;
-
-			R[2][0] = sin(this->argPeri) * sin_i;
-			R[2][1] = cos(this->argPeri) * sin_i;
-			R[2][2] = cos_i;
-		}
+		R[2][0] = sin(this->argPeri) * sin_i;
+		R[2][1] = cos(this->argPeri) * sin_i;
+		R[2][2] = cos_i;
 
 		ret_x = r_x_peri * R[0][0] + r_y_peri * R[0][1] + r_z_peri * R[0][2];
 		ret_y = r_x_peri * R[1][0] + r_y_peri * R[1][1] + r_z_peri * R[1][2];
