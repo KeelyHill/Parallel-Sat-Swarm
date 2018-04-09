@@ -16,7 +16,6 @@
 
 void update_satellite(satellite_t *sat, double delta_time);
 void logStep(FILE *f, int &simTime, satellite_t *sat, int &satItter, double &x_eci, double &y_eci, double &z_eci);
-//satellite_t * loadCSVConfig(char * filename);
 
 int main(int argc, char **argv) {
 	FILE *fOut;
@@ -32,8 +31,9 @@ int main(int argc, char **argv) {
 	// Defaults with no params
 	int numThreads = 0; // 0 default is automatic optimal (OpenMP)
 	int totalItter = (12 * 60 * 60) / DELTA_TIME; // total itterations to simulate
-	int numberSats = 300; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
 	int secondBetweenOutputLog = 60; // seconds between log writes // TODO cmd line arg?
+
+	int numberSats = 300; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
 
     for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-n") == 0) {
@@ -48,6 +48,10 @@ int main(int argc, char **argv) {
 			totalItter = (atoi(totalTimeStr) * 60) / DELTA_TIME;
 			printf("totalItter = %i\n ", totalItter);
 		}
+		else if (strcmp(argv[i], "-logfreq") == 0 || strcmp(argv[i], "-lf") == 0) { // help string
+			char* str = argv[i + 1];
+			secondBetweenOutputLog = atoi(str);
+		}
         else if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0) { // help string
 		    printf("\nUsage: ./main [-time t] [-threads n (default is optimum)]\n\n");
             return 0;
@@ -60,15 +64,15 @@ int main(int argc, char **argv) {
 	// printf("Size of sat_t: %lu\n", sizeof(satellite_t));
 	printf("** Initing Sats ** %f\n", read_timer());
 
-//	const char * input_file_name = "input.txt";  // TODO input filename as cmd line argument
-//	satellite_t *satellites = loadCSVConfig(input_file_name);
+	const char * input_file_name = "input.txt";  // TODO input filename as cmd line argument
+	satellite_t *satellites = loadCSVConfig(input_file_name, &numberSats);
 
-	satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
-	init_satellites(satellites, numberSats);
+	// satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
+	// init_satellites(satellites, numberSats);
 
     /* Simulating */
 
-    printf("** Starting Simulation (of %.0f min) ** %f\n", (totalItter*DELTA_TIME)/60.0, read_timer());
+    printf("** Starting Simulation (of %.0f min) with %i satellites ** %f\n", (totalItter*DELTA_TIME)/60.0, numberSats, read_timer());
 
     int freqPercentCount = (float)totalItter * FREQ_PERCENT_PRINT;
 	int freqOutputLogComparator = secondBetweenOutputLog / DELTA_TIME; // curItter % _ == 0, do a log

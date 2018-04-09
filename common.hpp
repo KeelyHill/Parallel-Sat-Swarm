@@ -32,7 +32,7 @@ Will Segmentation Fault if a line does not conform to the format.
 
 Do not parallelize!
 */
-satellite_t * loadCSVConfig(const char * fileName) {
+satellite_t * loadCSVConfig(const char * fileName, int *numSats) {
     unsigned int number_of_lines = 0;
     FILE *infile = fopen(fileName, "r");
 
@@ -70,6 +70,7 @@ satellite_t * loadCSVConfig(const char * fileName) {
         line_num++; // next array index
 	}
 
+    *numSats = number_of_lines;
     return satellites;
 }
 
