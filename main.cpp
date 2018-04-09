@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 
 	// Defaults with no params
 	int numThreads = 0; // 0 default is automatic optimal (OpenMP)
-	int totalItter = 12 * 60 * 60; // total seconds to simulate
+	int totalItter = (12 * 60 * 60) / DELTA_TIME; // total itterations to simulate
 	int numberSats = 300; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
 	int secondBetweenOutputLog = 60; // seconds between log writes // TODO cmd line arg?
 
@@ -44,8 +44,8 @@ int main(int argc, char **argv) {
 		}
 		else if (strcmp(argv[i], "-time") == 0 || strcmp(argv[i], "-t") == 0) {
 			// Set time in minutes
-			char* totalIterStr = argv[i + 1];
-			totalItter = atoi(totalIterStr) * 60;
+			char* totalTimeStr = argv[i + 1];
+			totalItter = (atoi(totalTimeStr) * 60) / DELTA_TIME;
 			printf("totalItter = %i\n ", totalItter);
 		}
         else if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0) { // help string
