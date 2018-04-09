@@ -142,10 +142,10 @@ void logStep(FILE *f, int &simTime, satellite_t *sat, int &satItter, double &x_e
 	// true anamoly is the only thing that changes in relation to the spacecrafts orbit
 	// (i.e. dont write all the other stuff unless it changes tick-to-tick)
 
-	/* For now i think:
-		tick, sat_id, true anamoly, x, y, z
-	*/
+	/* For now: tick, sat_id, true anamoly, x, y, z */
 
-    fprintf(f, "time: %d  Sat %d: trueAnomoly %0.2f, x %0.2f, y %0.2f, z %0.2f\n", simTime, satItter, sat->trueAnomaly, x_eci, y_eci, z_eci);
+
+
+    fprintf(f, "%d,%d,%0.2f,%0.1f,%0.1f,%0.1f\n", simTime, satItter, radToDegPos(sat->trueAnomaly), x_eci, y_eci, z_eci);
 
 }

@@ -1,9 +1,5 @@
-import matplotlib as mpl
-from mpl_toolkits.mplot3d import Axes3D
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 
+import numpy as np
 
 def WireframeSphere(centre=[0.,0.,0.], radius=1.,
                     n_meridians=20, n_circles_latitude=None):
@@ -25,35 +21,3 @@ def WireframeSphere(centre=[0.,0.,0.], radius=1.,
     sphere_y = centre[1] + radius * np.sin(u) * np.sin(v)
     sphere_z = centre[2] + radius * np.cos(v)
     return sphere_x, sphere_y, sphere_z
-
-
-mpl.rcParams['legend.fontsize'] = 10
-
-df = pd.read_csv('test_orbit.csv')
-
-# df = df[:20000]
-# print(df.head())
-
-fig = plt.figure(1)
-fig.clf()
-# ax = Axes3D(fig)
-ax = fig.gca(projection='3d')
-
-# draw sphere
-sphere = ax.plot_wireframe(*WireframeSphere(radius=6371), color="blue", alpha=0.5)
-
-for index, pos in df.iterrows():
-    x,y,z = float(pos['x']), float(pos['y']), float(pos['z'])
-
-    if index % 400 == 0:
-        ax.scatter(x,y,z, c='r')
-
-
-ax.set_aspect('equal')
-
-ax.set_zlim3d([-20000, 20000])
-ax.set_ylim3d([-20000, 20000])
-ax.set_xlim3d([-20000, 20000])
-
-plt.draw()
-plt.show()
