@@ -33,7 +33,7 @@ typedef struct {
 
 	// this does not change with time, based only on semi-major axis (a)
 	double calc_mean_motion() {
-	 	static double a_cubed = this->a * this->a * this->a; // rad/sec TODO this could probably be static
+	 	double a_cubed = this->a * this->a * this->a; // rad/sec
 		return sqrt(EARTH_G/a_cubed);
 	}
 
