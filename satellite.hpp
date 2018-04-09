@@ -37,7 +37,7 @@ typedef struct {
 		return sqrt(EARTH_G/a_cubed);
 	}
 
-	/** */
+	/** Returns mean anomaly (from the true anomoly) */
 	double true_to_mean_anoml() {
 		double f = trueAnomaly;
 
@@ -50,7 +50,7 @@ typedef struct {
     	return E - e * sin(E);
 	}
 
-	/** */
+	/** Returns true anomaly (from mean anomaly) */
 	double mean_to_true_anoml(double M) {
 
 		// mean to Ecc
@@ -60,7 +60,7 @@ typedef struct {
 		return 2 * atan2( sqrt(1 + e) * sin(E / 2), sqrt(1 - e) * cos(E / 2) );
 	}
 
-	/** */
+	/** Returns eccentric anomaly (from mean anamoly), solving Kepler equation. */
 	double mean_to_eccentric_anomaly(double M, double tolerance=1e-14) {
 
 		double Mnorm, E, E0, dE, count;
@@ -92,7 +92,8 @@ typedef struct {
 		return E;
 	}
 
-	/** */
+	/** Returns x,y,z as Earth Centered Inertial (ECI) coordinates
+		ECI: x,y,z relative to center of non-roating Earth*/
 	void getECI_XYZ(double &ret_x, double &ret_y, double &ret_z) {
 		double * f = &this->trueAnomaly;
 		double radius_at_f = (this->a * (1 - this->e * this->e)) / (1 + this->e * cos(*f));
@@ -138,7 +139,7 @@ void init_satellites(satellite_t *sats, int n) {
 		sats[i].trueAnomaly = degToRad(5); // aka: `f`
 
 		sats[i].a = 25600; //Km
-		sats[i].e = 0.6;
+		sats[i].e = 0.0;
 		sats[i].i = 0;
 		sats[i].rAscen = 0;
 		sats[i].argPeri = 0;
@@ -180,10 +181,10 @@ bool lineIntersectsSphere(double &x1, double &y1, double &z1, double &x2, double
 
 
 /**
+Given two satilites, determines (boolean) if they have line of site of each other.
+Method: check if the line created by each of their ECI 3D points intersects the Earth sphere.
 
 TODO shrink sphere to model atmosphere bouncing
-TODO docstring
-
 */
 bool satellitesHaveLineOfSight(satellite_t *one, satellite_t *two) {
 	double x1_eci, y1_eci, z1_eci;
@@ -193,6 +194,5 @@ bool satellitesHaveLineOfSight(satellite_t *one, satellite_t *two) {
 
 	return !lineIntersectsSphere(x1_eci, y1_eci, z1_eci, x2_eci, y2_eci, z2_eci, EARTH_RADIUS_SQUARED);
 }
-
 
 #endif

@@ -31,18 +31,11 @@ int main(int argc, char **argv) {
 	// Defaults with no params
 	int numThreads = 0; // 0 default is automatic optimal (OpenMP)
 	int totalItter = (12 * 60 * 60) / DELTA_TIME; // total itterations to simulate
-	int secondBetweenOutputLog = 60; // seconds between log writes // TODO cmd line arg?
+	int secondBetweenOutputLog = 60; // simulated seconds between file log (smaller->slower)
 
-	int numberSats = 300; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
 
     for (int i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-n") == 0) {
-			// Set number of threads
-			char* numThreadsStr = argv[i + 1];
-            numThreads = atoi(numThreadsStr);
-			printf("numThreads = %d\n", numThreads);
-		}
-		else if (strcmp(argv[i], "-time") == 0 || strcmp(argv[i], "-t") == 0) {
+		if (strcmp(argv[i], "-time") == 0 || strcmp(argv[i], "-t") == 0) {
 			// Set time in minutes
 			char* totalTimeStr = argv[i + 1];
 			totalItter = (atoi(totalTimeStr) * 60) / DELTA_TIME;
@@ -52,8 +45,14 @@ int main(int argc, char **argv) {
 			char* str = argv[i + 1];
 			secondBetweenOutputLog = atoi(str);
 		}
+		else if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-n") == 0) {
+			// Set number of threads
+			char* numThreadsStr = argv[i + 1];
+            numThreads = atoi(numThreadsStr);
+			printf("numThreads = %d\n", numThreads);
+		}
         else if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0) { // help string
-		    printf("\nUsage: ./main [-time t] [-threads n (default is optimum)]\n\n");
+		    printf("\nUsage: ./main [-time t] [-logfreq lf] [-threads n (default is optimum)]\n\n");
             return 0;
 		}
 	}
@@ -63,6 +62,8 @@ int main(int argc, char **argv) {
 
 	// printf("Size of sat_t: %lu\n", sizeof(satellite_t));
 	printf("** Initing Sats ** %f\n", read_timer());
+
+	int numberSats = 0;
 
 	const char * input_file_name = "input.txt";  // TODO input filename as cmd line argument
 	satellite_t *satellites = loadCSVConfig(input_file_name, &numberSats);
@@ -128,24 +129,18 @@ int main(int argc, char **argv) {
 void update_satellite(satellite_t *sat, double delta_time) {
     double mean_anoml = sat->true_to_mean_anoml(); // M_0
 
-    // printf("true: %f == %f\n", sat->trueAnomaly, radToDegPos(sat->trueAnomaly));
-    // printf("mean motion: %f mean anoml: %f\n", sat->calc_mean_motion(), mean_anoml);
-
     // M_1 = M_0 + mean_motion + delta-t(s)
     mean_anoml += sat->calc_mean_motion() * delta_time;
 
     sat->trueAnomaly = sat->mean_to_true_anoml(mean_anoml); // new true anomaly
 }
 
-/* TODO Append new info of satellites to output file format. */
+/* Append new info of a satellite to output file format. */
 void logStep(FILE *f, int &simTime, satellite_t *sat, int &satItter, double &x_eci, double &y_eci, double &z_eci) {
 	// true anamoly is the only thing that changes in relation to the spacecrafts orbit
 	// (i.e. dont write all the other stuff unless it changes tick-to-tick)
 
 	/* For now: tick, sat_id, true anamoly, x, y, z */
 
-
-
     fprintf(f, "%d,%d,%0.2f,%0.1f,%0.1f,%0.1f\n", simTime, satItter, radToDegPos(sat->trueAnomaly), x_eci, y_eci, z_eci);
-
 }
