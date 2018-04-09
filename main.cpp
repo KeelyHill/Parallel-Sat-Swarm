@@ -12,28 +12,28 @@
 #include "common.hpp"
 
 #define FREQ_PERCENT_PRINT 0.1 // how often to print state of completion
-#define DELTA_TIME 1
-            // seconds
+#define DELTA_TIME 1  // seconds
 
 void update_satellite(satellite_t *sat, double delta_time);
-void logStep(FILE* f, satellite_t *sat, int satItter, double x_eci, double y_eci, double z_eci);
+void logStep(FILE *f, int &simTime, satellite_t *sat, int &satItter, double &x_eci, double &y_eci, double &z_eci);
 //satellite_t * loadCSVConfig(char * filename);
 
 int main(int argc, char **argv) {
-	// LOAD IN CSV
-	FILE* stream = fopen("input.txt", "r");
-	FILE *f;
+	FILE *fOut;
 
-        f = fopen ("output.txt", "w");
-        if (f == NULL) {
-          f = fopen("output.txt", "wb");
-        }
+    fOut = fopen ("output.txt", "w");
+    if (fOut == NULL) {
+      fOut = fopen("output.txt", "wb");
+    }
 
+	char buf[65536]; // 2^16, big buffer prevents constantly writing to file.
+	setvbuf(fOut, buf, _IOFBF, sizeof(buf));
 
 	// Defaults with no params
 	int numThreads = 0; // 0 default is automatic optimal (OpenMP)
 	int totalItter = 12 * 60 * 60; // total seconds to simulate
 	int numberSats = 300; // TODO some way of loading our satilite orbit params from a config-like file (e.g. json, txt) will be needed
+	int secondBetweenOutputLog = 60; // seconds between log writes // TODO cmd line arg?
 
     for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-n") == 0) {
@@ -66,61 +66,59 @@ int main(int argc, char **argv) {
 	satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
 	init_satellites(satellites, numberSats);
 
-    /** Simulating */
+    /* Simulating */
 
+    printf("** Starting Simulation (of %.0f min) ** %f\n", (totalItter*DELTA_TIME)/60.0, read_timer());
 
+    int freqPercentCount = (float)totalItter * FREQ_PERCENT_PRINT;
+	int freqOutputLogComparator = secondBetweenOutputLog / DELTA_TIME; // curItter % _ == 0, do a log
 
-    printf("** Starting Simulation ** %f\n", read_timer());
+    int curItter = 0;
+	int curSimTime = 0; // curItter * DELTA_TIME
+	for (int curItter = 0; curItter<totalItter; curItter++) {
+        curSimTime = curItter * DELTA_TIME;
 
-    // #pragma omp parallel num_threads(numThreads)
-    // {
+		/* Update satellite orbital positions */
 
-        /* Update satellite orbital positions */
-
-        int freqPercentCount = (float)totalItter * FREQ_PERCENT_PRINT;
-
-        int curItter = 0;
-    	for (int curItter = 0; curItter<totalItter; curItter++) {
-
-            satellite_t asat = satellites[0];
-
-            double x_eci, y_eci, z_eci;
-            asat.getECI_XYZ(x_eci, y_eci, z_eci);
-            // printf("%0.2f, %0.2f, %0.2f\n", x_eci,y_eci,z_eci);
-
-    		// printf("tick: %i  sat1-f: %f deg  vel: %.4f Km/s   dist_trav: %.1f m\n", curItter, radToDegPos(asat.trueAnomaly), vel, vel * DELTA_TIME * 1000);
-
-            #pragma omp parallel for num_threads(numThreads)
-    		for(int i=0; i<numberSats; i++) {
+		double x_eci, y_eci, z_eci;
+        #pragma omp parallel for num_threads(numThreads) private (x_eci, y_eci, z_eci)
+		for(int i=0; i<numberSats; i++) {
 		    update_satellite(&satellites[i], DELTA_TIME);
-//                    printf("Hello from %i of %i\n", omp_get_thread_num(), omp_get_num_threads());
 
-
-//    		for(int i=0; i<numberSats; i++) {
 		    if(curItter % freqPercentCount == 0) {
- 	                satellites[i].getECI_XYZ(x_eci, y_eci, z_eci);
-    	                logStep(f, &satellites[i], i, x_eci, y_eci, z_eci);
+				// satellites[i].getECI_XYZ(x_eci, y_eci, z_eci);
+				// #pragma omp critical
+				// logStep(fOut, &satellites[i], i, x_eci, y_eci, z_eci);
 		    }
-//                }
-
-
-
-                }
-
-            #pragma omp master
-            if (curItter % freqPercentCount == 0) {
-                printf("| %i%%\n", (int)(curItter/(float)totalItter * 100));
-//    		for(int i=0; i<numberSats; i++) {
-//	            satellites[i].getECI_XYZ(x_eci, y_eci, z_eci);
-//    	            logStep(&satellites[i], i, x_eci, y_eci, z_eci);
-//                }
-            }
         }
-    // }
+
+        #pragma omp master
+        if (curItter % freqPercentCount == 0) {
+            printf("| %i%%\n", (int)(curItter/(float)totalItter * 100));
+        }
+
+
+		#pragma omp master
+		if (curItter % freqOutputLogComparator == 0) {
+			for(int i=0; i<numberSats; i++) {
+				satellites[i].getECI_XYZ(x_eci, y_eci, z_eci);
+				logStep(fOut, curSimTime, &satellites[i], i, x_eci, y_eci, z_eci);
+			}
+			fflush(fOut);
+		}
+
+    }
+
+
+	/* Clean up */
+
 	free(satellites);
 
     printf("** End Simulation ** took %f sec.\n", read_timer());
-    fclose(f);
+
+	// fprintf(fOut, "EOF");
+	fflush(fOut);
+    fclose(fOut);
 }
 
 void update_satellite(satellite_t *sat, double delta_time) {
@@ -136,23 +134,14 @@ void update_satellite(satellite_t *sat, double delta_time) {
 }
 
 /* TODO Append new info of satellites to output file format. */
-//void logStep(FILE *f, satellite_t *satellites) {
-void logStep(FILE *f, satellite_t *sat, int satItter, double x_eci, double y_eci, double z_eci) {
-
-	// 'cur time' should be logged
-
+void logStep(FILE *f, int &simTime, satellite_t *sat, int &satItter, double &x_eci, double &y_eci, double &z_eci) {
 	// true anamoly is the only thing that changes in relation to the spacecrafts orbit
 	// (i.e. dont write all the other stuff unless it changes tick-to-tick)
 
 	/* For now i think:
 		tick, sat_id, true anamoly, x, y, z
 	*/
-//    int i;
 
-//    for (i = 0; i < 10; i++){
-//      fprintf (f, "This is line %d\n", i +1);
-//    }
-
-    fprintf(f, "Sat %d: tureAnomoly %0.2f, x %0.2f, y %0.2f, z %0.2f\n", satItter, sat->trueAnomaly, x_eci, y_eci, z_eci);
+    fprintf(f, "time: %d  Sat %d: trueAnomoly %0.2f, x %0.2f, y %0.2f, z %0.2f\n", simTime, satItter, sat->trueAnomaly, x_eci, y_eci, z_eci);
 
 }
