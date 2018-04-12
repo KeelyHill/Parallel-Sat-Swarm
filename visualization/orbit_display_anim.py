@@ -10,7 +10,7 @@ from WireframeSphere import WireframeSphere
 
 mpl.rcParams['legend.fontsize'] = 5
 
-df = pd.read_csv('output.txt', names=['time', 'satid', 'trueA', 'x', 'y', 'z'])
+df = pd.read_csv('output.txt', names=['logItter', 'time', 'satid', 'trueA', 'x', 'y', 'z'])
 
 fig = plt.figure(1, figsize=(11, 6), dpi=120)
 fig.clf()
@@ -20,7 +20,7 @@ ax = fig.gca(projection='3d')
 def domeanim(i, scat):
     ax.view_init(45, (i/3)%360)
 
-    frame = df.loc[df['time'] == i*300] # TODO this multiplicate is messy -- based on log frequency
+    frame = df.loc[df['logItter'] == i] # logItter increments each new set of points
 
     # clear and redraw static stuff
     ax.cla()

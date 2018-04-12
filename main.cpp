@@ -170,10 +170,17 @@ void update_satellite(satellite_t *sat, double delta_time) {
 
 /* Append new info of a satellite to output file format. */
 void logStep(FILE *f, int &simTime, satellite_t *sat, int &satItter, double &x_eci, double &y_eci, double &z_eci) {
+	static int logItter = 0;
+	static int lastSimTime;
+
+	if (lastSimTime != simTime) {
+		lastSimTime = simTime;
+		logItter += 1; // increments by 1 for each set of points (for easier visualization/categorization)
+	}
+
 	// true anamoly is the only thing that changes in relation to the spacecrafts orbit
 	// (i.e. dont write all the other stuff unless it changes tick-to-tick)
 
 	/* For now: tick, sat_id, true anamoly, x, y, z */
-
-    fprintf(f, "%d,%d,%0.2f,%0.1f,%0.1f,%0.1f\n", simTime, satItter, radToDegPos(sat->trueAnomaly), x_eci, y_eci, z_eci);
+    fprintf(f, "%d,%d,%d,%0.2f,%0.1f,%0.1f,%0.1f\n", logItter, simTime, satItter, radToDegPos(sat->trueAnomaly), x_eci, y_eci, z_eci);
 }
