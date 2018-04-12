@@ -71,6 +71,15 @@ int main(int argc, char **argv) {
 	// satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
 	// init_satellites(satellites, numberSats);
 
+	// Statistics Variables:
+
+	// counting average of unique lines of sight
+	float total_lineOfSightSum = 0; // over all sim time
+	int lineOfSightSum = 0; // per tick reduction
+
+	int total_ClosePasses = 0; // over all sim time
+	int closePassesSum = 0; // per tick reduction
+
     /* Simulating */
 
     printf("** Starting Simulation (of %.0f min) with %i satellites ** %f\n", (totalItter*DELTA_TIME)/60.0, numberSats, read_timer());
@@ -85,18 +94,32 @@ int main(int argc, char **argv) {
 
 		/* Update satellite orbital positions */
 
-		double x_eci, y_eci, z_eci;
-        #pragma omp parallel for num_threads(numThreads) private (x_eci, y_eci, z_eci)
-		for(int i=0; i<numberSats; i++) {
-		    update_satellite(&satellites[i], DELTA_TIME);
+		lineOfSightSum = 0;
+		closePassesSum = 0;
 
-		    if(curItter % freqPercentCount == 0) {
-				// satellites[i].getECI_XYZ(x_eci, y_eci, z_eci);
-				// #pragma omp critical
-				// logStep(fOut, &satellites[i], i, x_eci, y_eci, z_eci);
-		    }
+		// Location comparisons and statistics
+		double x_eci, y_eci, z_eci;
+        #pragma omp parallel for num_threads(numThreads) private (x_eci, y_eci, z_eci) reduction(+:lineOfSightSum) reduction(+:closePassesSum)
+		for(int i=0; i<numberSats; i++) {
+
+			double distance = -1;
+			satellites[i].getECI_XYZ(x_eci, y_eci, z_eci);
+
+			for(int j = i+1; j<numberSats; j++) { // note: j = i+1, O(NlogN) -- counting unique connections
+				lineOfSightSum += satellitesHaveLineOfSight(x_eci, y_eci, z_eci, &satellites[j], distance);
+
+				if (distance < 100 && distance >= 0) { // TODO make cutoff #define or a cmd line arg
+					closePassesSum += 1;
+				}
+			}
+
         }
 
+		// Update locations
+		#pragma omp parallel for num_threads(numThreads)
+		for(int i=0; i<numberSats; i++) {
+		    update_satellite(&satellites[i], DELTA_TIME);
+        }
         #pragma omp master
         if (curItter % freqPercentCount == 0) {
             printf("| %i%%\n", (int)(curItter/(float)totalItter * 100));
@@ -112,14 +135,24 @@ int main(int argc, char **argv) {
 			fflush(fOut);
 		}
 
-    }
+		#pragma omp master
+		{
+			total_ClosePasses += closePassesSum;
+			closePassesSum = 0;
+			total_lineOfSightSum += lineOfSightSum/(float)numberSats;
+		}
 
+	} // end main simulation itter for
+
+	/* Report statistics */
+	printf("** End Simulation ** took %f sec.\n", read_timer());
+
+	printf("Avg. Number lines of sight (per sat). %f\n", total_lineOfSightSum/(double)totalItter);
+	printf("Total Close Passes %i\n", total_ClosePasses);
 
 	/* Clean up */
 
 	free(satellites);
-
-    printf("** End Simulation ** took %f sec.\n", read_timer());
 
 	// fprintf(fOut, "EOF");
 	fflush(fOut);

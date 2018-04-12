@@ -195,4 +195,16 @@ bool satellitesHaveLineOfSight(satellite_t *one, satellite_t *two) {
 	return !lineIntersectsSphere(x1_eci, y1_eci, z1_eci, x2_eci, y2_eci, z2_eci, EARTH_RADIUS_SQUARED);
 }
 
+bool satellitesHaveLineOfSight(double &x1_eci, double &y1_eci, double &z1_eci, satellite_t *other, double &retDistance) {
+	double x2_eci, y2_eci, z2_eci;
+	other->getECI_XYZ(x2_eci, y2_eci, z2_eci);
+
+	double dx = x2_eci - x1_eci;
+	double dy = y2_eci - y1_eci;
+	double dz = z2_eci - z1_eci;
+	retDistance = sqrt(dx*dx + dy*dy + dz*dz);
+
+	return !lineIntersectsSphere(x1_eci, y1_eci, z1_eci, x2_eci, y2_eci, z2_eci, EARTH_RADIUS_SQUARED);
+}
+
 #endif
