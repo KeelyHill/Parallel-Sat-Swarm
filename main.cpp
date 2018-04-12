@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 			// Set time in minutes
 			char* totalTimeStr = argv[i + 1];
 			totalItter = (atoi(totalTimeStr) * 60) / DELTA_TIME;
-			printf("totalItter = %i\n ", totalItter);
+			// printf("totalItter = %i\n", totalItter);
 		}
 		else if (strcmp(argv[i], "-logfreq") == 0 || strcmp(argv[i], "-lf") == 0) { // help string
 			char* str = argv[i + 1];
@@ -51,8 +51,8 @@ int main(int argc, char **argv) {
             numThreads = atoi(numThreadsStr);
 			printf("numThreads = %d\n", numThreads);
 		}
-        else if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0) { // help string
-		    printf("\nUsage: ./main [-time t] [-logfreq lf] [-threads n (default is optimum)]\n\n");
+        else if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) { // help string
+		    printf("\nUsage: ./main [-time t (minutes)] [-logfreq lf (seconds)] [-threads n (default optimum)]\n\n");
             return 0;
 		}
 	}
@@ -84,8 +84,8 @@ int main(int argc, char **argv) {
 
     printf("** Starting Simulation (of %.0f min) with %i satellites ** %f\n", (totalItter*DELTA_TIME)/60.0, numberSats, read_timer());
 
-    int freqPercentCount = (float)totalItter * FREQ_PERCENT_PRINT;
-	int freqOutputLogComparator = secondBetweenOutputLog / DELTA_TIME; // curItter % _ == 0, do a log
+    const int freqPercentCount = (float)totalItter * FREQ_PERCENT_PRINT;
+	const int freqOutputLogComparator = secondBetweenOutputLog / DELTA_TIME; // curItter % _ == 0, do a log
 
     int curItter = 0;
 	int curSimTime = 0; // curItter * DELTA_TIME
@@ -120,12 +120,14 @@ int main(int argc, char **argv) {
 		for(int i=0; i<numberSats; i++) {
 		    update_satellite(&satellites[i], DELTA_TIME);
         }
+
+		// Terminal percent progress indicator
         #pragma omp master
         if (curItter % freqPercentCount == 0) {
             printf("| %i%%\n", (int)(curItter/(float)totalItter * 100));
         }
 
-
+		// Loger (with freqOutputLogComparator)
 		#pragma omp master
 		if (curItter % freqOutputLogComparator == 0) {
 			for(int i=0; i<numberSats; i++) {
