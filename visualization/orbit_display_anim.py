@@ -43,15 +43,20 @@ def domeanim(i, scat):
         # print(row['x'])
         x,y,z = float(row['x']), float(row['y']), float(row['z'])
 
-        color = ['b', 'g', 'r', 'c', 'm', 'y', 'k'][int(row['satid']) % 7]
+        # color = ['b', 'g', 'r', 'c', 'm', 'y', 'k'][int(row['satid']) % 7]
 
-        ax.plot_wireframe(*WireframeSphere(radius=1400,center=[x,y,z], n_meridians=4), color=color, alpha=0.7)
+        color = 'blue'
+        if (row['satid']%6) == 2 or (row['satid']%6) == 3:
+            color = 'm'
+        if (row['satid']%6) == 4 or (row['satid']%6) == 5:
+            color = 'red'
+
+        ax.plot_wireframe(*WireframeSphere(radius=1200,center=[x,y,z], n_meridians=6), color=color, alpha=0.5)
         ax.scatter(x,y,z, c=color,marker="o")
 
 
-
 scat = ax.scatter(0,0,0)
-LENTH_SEC = 15
+LENTH_SEC = 40
 anim = animation.FuncAnimation(fig, domeanim, interval=10, frames=LENTH_SEC*30, fargs=(scat,))
 
 plt.tight_layout()
