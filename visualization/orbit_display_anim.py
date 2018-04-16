@@ -19,14 +19,19 @@ ax = fig.gca(projection='3d')
 
 AXIS_BOUND = 13000  # default:20000
 
+font = {'fontname':'Courier'}
+
 def domeanim(i, scat):
-    ax.view_init(45, (i/5)%360)
+    # ax.view_init(65, (i/12)%360) # orbit Z axis
+    ax.view_init(90-(i/15)%360, 45) # pivot XY plane
 
     frame = df.loc[df['logItter'] == i] # logItter increments each new set of points
 
     # clear and redraw static stuff
     ax.cla()
     ax.set_aspect('equal')
+
+    ax.text2D(0.90, 0.95, "Time (min): %i" % (int(frame.iloc[0]['time'])/60), transform=ax.transAxes)
 
     ax.set_zlim3d([-AXIS_BOUND, AXIS_BOUND])
     ax.set_ylim3d([-AXIS_BOUND, AXIS_BOUND])
@@ -55,4 +60,5 @@ print("Starting MP4 Render.")
 anim.save('animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 print("MP4 Export Done!")
 
+print("Showing live.")
 plt.show()
