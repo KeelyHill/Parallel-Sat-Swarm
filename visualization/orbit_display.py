@@ -9,7 +9,7 @@ from WireframeSphere import WireframeSphere
 
 mpl.rcParams['legend.fontsize'] = 10
 
-df = pd.read_csv('output.txt', names=['time', 'satid', 'trueA', 'x', 'y', 'z'])
+df = pd.read_csv('output.txt', names=['logItter', 'time', 'satid', 'trueA', 'x', 'y', 'z'])
 
 # df = df[:20000]
 # print(df.head())
@@ -24,12 +24,11 @@ sphere = ax.plot_wireframe(*WireframeSphere(radius=6371), color="blue", alpha=0.
 
 for index, row in df.iterrows():
 
-    if row['satid'] not in [0, 1, 2]:
+    if row['satid'] not in [0, 1] or row['logItter'] % 10 != 0:
         continue
 
     x,y,z = float(row['x']), float(row['y']), float(row['z'])
 
-    # if index/15 % 10 == 0:
     color = 'rgb'[int(row['satid'])]
     ax.scatter(x,y,z, c=color)
 

@@ -17,8 +17,10 @@ fig.clf()
 # ax = Axes3D(fig)
 ax = fig.gca(projection='3d')
 
+AXIS_BOUND = 13000  # default:20000
+
 def domeanim(i, scat):
-    ax.view_init(45, (i/3)%360)
+    ax.view_init(45, (i/5)%360)
 
     frame = df.loc[df['logItter'] == i] # logItter increments each new set of points
 
@@ -26,9 +28,9 @@ def domeanim(i, scat):
     ax.cla()
     ax.set_aspect('equal')
 
-    ax.set_zlim3d([-20000, 20000])
-    ax.set_ylim3d([-20000, 20000])
-    ax.set_xlim3d([-20000, 20000])
+    ax.set_zlim3d([-AXIS_BOUND, AXIS_BOUND])
+    ax.set_ylim3d([-AXIS_BOUND, AXIS_BOUND])
+    ax.set_xlim3d([-AXIS_BOUND, AXIS_BOUND])
 
     ax.plot_wireframe(*WireframeSphere(radius=6371), color="blue", alpha=0.5)
 
@@ -38,18 +40,19 @@ def domeanim(i, scat):
 
         color = ['b', 'g', 'r', 'c', 'm', 'y', 'k'][int(row['satid']) % 7]
 
-        # ax.plot_wireframe(*WireframeSphere(radius=2000,center=[x,y,z], n_meridians=5), color=color, alpha=0.7)
+        ax.plot_wireframe(*WireframeSphere(radius=1400,center=[x,y,z], n_meridians=4), color=color, alpha=0.7)
         ax.scatter(x,y,z, c=color,marker="o")
 
 
 
 scat = ax.scatter(0,0,0)
-anim = animation.FuncAnimation(fig, domeanim, interval=10, frames=300, fargs=(scat,))
+LENTH_SEC = 15
+anim = animation.FuncAnimation(fig, domeanim, interval=10, frames=LENTH_SEC*30, fargs=(scat,))
 
 plt.tight_layout()
 
-# print("Starting MP4 Render.")
-# anim.save('animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
-# print("MP4 Export Done!")
+print("Starting MP4 Render.")
+anim.save('animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+print("MP4 Export Done!")
 
 plt.show()
