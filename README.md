@@ -1,5 +1,7 @@
 # Parallel Sat Swarm Orbit
 
+[Visualized Video Demo](https://www.youtube.com/watch?v=FchF6sSAxc4)
+
 ![Testing 3D coords](https://github.com/KeelyHill/Parallel-Sat-Swarm/blob/master/img/test-3d-coords-orbit.png)
 ---------
 
@@ -81,3 +83,9 @@ Now doing stretch things (whatever we can do by the end).
 - Maybe model data production (e.g. pictures)
 - Take statistics
 - Track close approaches
+
+
+## More visuals
+
+![Equator and Cross](./img/equator-cross-orbits.png)
+![Polar](./img/polar-orbits.png)
