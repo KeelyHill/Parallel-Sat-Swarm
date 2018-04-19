@@ -28,6 +28,8 @@ int main(int argc, char **argv) {
 	char buf[65536]; // 2^16, big buffer prevents constantly writing to file.
 	setvbuf(fOut, buf, _IOFBF, sizeof(buf));
 
+	char *inputFileName = (char *)"input.txt";
+
 	// Defaults with no params
 	int numThreads = 0; // 0 default is automatic optimal (OpenMP)
 	int totalItter = (12 * 60 * 60) / DELTA_TIME; // total itterations to simulate
@@ -45,6 +47,9 @@ int main(int argc, char **argv) {
 			char* str = argv[i + 1];
 			secondBetweenOutputLog = atoi(str);
 		}
+		else if (strcmp(argv[i], "-in") == 0 || strcmp(argv[i], "-i") == 0) { // help string
+			inputFileName = argv[i + 1];
+		}
 		else if (strcmp(argv[i], "-threads") == 0 || strcmp(argv[i], "-n") == 0) {
 			// Set number of threads
 			char* numThreadsStr = argv[i + 1];
@@ -57,21 +62,21 @@ int main(int argc, char **argv) {
 		}
 	}
 
-
 	/* Initing */
-
-	// printf("Size of sat_t: %lu\n", sizeof(satellite_t));
-	printf("** Initing Sats ** %f\n", read_timer());
 
 	int numberSats = 0;
 
-	const char * input_file_name = "input.txt";  // TODO input filename as cmd line argument
-	satellite_t *satellites = loadCSVConfig(input_file_name, &numberSats);
+	// printf("Size of sat_t: %lu\n", sizeof(satellite_t));
+	printf("\n** Initing Sats ** %f\n", read_timer());
 
-	// satellite_t *satellites = (satellite_t*) malloc( numberSats * sizeof(satellite_t) );
-	// init_satellites(satellites, numberSats);
+	printf("Reading: %s\n", inputFileName);
+	satellite_t *satellites = loadCSVConfig(inputFileName, &numberSats);
+	if (satellites == NULL) {
+		printf("File `%s` could not be read (probably does not exist).\n", inputFileName);
+		return 0;
+	}
 
-	// Statistics Variables:
+	/// Statistics Variables:
 
 	// counting average of unique lines of sight
 	float total_lineOfSightSum = 0; // over all sim time

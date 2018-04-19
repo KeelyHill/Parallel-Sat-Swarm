@@ -36,6 +36,8 @@ satellite_t * loadCSVConfig(const char * fileName, int *numSats) {
     unsigned int number_of_lines = 0;
     FILE *infile = fopen(fileName, "r");
 
+    if (infile == NULL) return NULL; // tell caller file can't be opened
+
     int ch;
     // count number of line to init satillites array
     while (EOF != (ch=getc(infile)))
