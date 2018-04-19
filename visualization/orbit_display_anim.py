@@ -22,8 +22,9 @@ AXIS_BOUND = 13000  # default:20000
 font = {'fontname':'Courier'}
 
 def domeanim(i, scat):
-    # ax.view_init(65, (i/12)%360) # orbit Z axis
-    ax.view_init(90-(i/15)%360, 45) # pivot XY plane
+    # ax.view_init(65, (i/6)%360) # orbit Z axis
+    # ax.view_init(70-(i/10)%360, 45) # pivot XY plane
+    ax.view_init(45-(i/12)%360, 90+(i/6)%360)
 
     frame = df.loc[df['logItter'] == i] # logItter increments each new set of points
 
