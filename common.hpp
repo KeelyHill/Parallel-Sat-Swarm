@@ -53,7 +53,7 @@ satellite_t * loadCSVConfig(const char * fileName, int *numSats) {
     char line[1024];
 	while (fgets(line, 1024, infile)) { // read line by line
 
-        if (line[0] == '#' || line[1] == '#') continue; // a 'comment', so ignore line
+        if (line[0] == '#' || line[1] == '#' || line[0] == '\n') continue; // a 'comment', so ignore line
 
         // grab & convert each comma separated value
         char *pt;
