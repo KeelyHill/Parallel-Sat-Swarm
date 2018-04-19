@@ -52,6 +52,15 @@ Each line is a satellite. Orbital elements are comma separated. Blank lines okay
 See `inputs/` directory for more, larger examples.
 
 
+## Future Work
+- Model ground stations _on_ the planet sphere and have them rotate with the planet.
+
+- Atmosphere interaction (probably with micro maneuvers every tick). Requires a form and mass for each satellite. This project assumes station keeping, thus &Delta;V required do attitude control could also be modeled.
+
+- Network simulations, not just generic communication line of sight. (This is a whole project in itself, but this can provide the backbone.) For example, could vary traffic based on population and time of day of location passing over. Can help understand what kind of communication hardware is needed for a swarm task.
+
+- Use to calculate earth imagery percent-daily coverage given a certain focal length (thus field of view) of a lens.
+
 ## 2 April 2018 Programming Progress
 
 Orbit simulation code done
