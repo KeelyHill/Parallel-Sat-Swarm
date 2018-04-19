@@ -35,8 +35,10 @@ int main(int argc, char **argv) {
 	int totalItter = (12 * 60 * 60) / DELTA_TIME; // total itterations to simulate
 	int secondBetweenOutputLog = 60; // simulated seconds between file log (smaller->slower)
 
+	const char * helpString = \
+		"Usage: ./main [-time t (mins)] [-logfreq lf (seconds)] [-in i (input file)] [-threads n]";
 
-    for (int i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-time") == 0 || strcmp(argv[i], "-t") == 0) {
 			// Set time in minutes
 			char* totalTimeStr = argv[i + 1];
@@ -57,7 +59,7 @@ int main(int argc, char **argv) {
 			printf("numThreads = %d\n", numThreads);
 		}
         else if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) { // help string
-		    printf("\nUsage: ./main [-time t (minutes)] [-logfreq lf (seconds)] [-threads n (default optimum)]\n\n");
+		    printf("\n%s\n\n",helpString);
             return 0;
 		}
 	}

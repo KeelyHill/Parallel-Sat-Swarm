@@ -3,6 +3,55 @@
 ![Testing 3D coords](https://github.com/KeelyHill/Parallel-Sat-Swarm/blob/master/img/test-3d-coords-orbit.png)
 ---------
 
+## Running
+Requires a C++ compiler that supports OpenMP.
+
+Modify the Makefile or `CC` if needed.
+
+On Mac: `$ make build`
+
+Other: `$ make linux`
+
+This creates an executable.  
+`$ ./main.out` will run with default options.
+
+## Command Line Options
+
+- `time (-t)`: time to simulate (in minutes)
+
+- `logfreq (-lf)`: simulation seconds between output logging (larger == faster)
+
+- `in (-i)`: input file path
+
+- `threads (-n)`: number of threads to run, default is optimal
+
+- `help (-h)`: Usage display
+
+**Example usage** (~1 week, logging positions every minute):  
+`$ ./main.out -t 10000 -lf 60 -i inputs/polar1.txt`
+
+## Input file
+Each line is a satellite. Orbital elements are comma separated. Blank lines okay, create full line comments with `#`.
+
+- semi-major axis
+- eccentricity
+- inclination
+- right ascension (Ω)
+- argument of periapsis (ω)
+- true anomaly (f)
+
+`a, e, i, rAscen(Ω), argPeri(ω), trueAnomaly(f)`
+
+### Example:
+```
+# Two eccentric orbits
+21000,0.4,0,6,0,0
+15345,0.5,0,12,0,90
+```
+
+See `inputs/` directory for more, larger examples.
+
+
 ## 2 April 2018 Programming Progress
 
 Orbit simulation code done
@@ -19,8 +68,7 @@ Create input file loader for testing various configurations.
 Need some kind of output
 
 Now doing stretch things (whatever we can do by the end).
-	- Model communications somehow
-	- Maybe model data production (e.g. pictures)
-	- Take statistics
-	- Track close approaches
-	- Ideas from class?
+- Model communications somehow
+- Maybe model data production (e.g. pictures)
+- Take statistics
+- Track close approaches
