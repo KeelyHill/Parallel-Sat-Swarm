@@ -2,7 +2,7 @@
 
 [Visualized Video Demo](https://www.youtube.com/watch?v=FchF6sSAxc4)
 
-![Testing 3D coords](https://github.com/KeelyHill/Parallel-Sat-Swarm/blob/master/img/test-3d-coords-orbit.png)
+![Testing 3D coords](./img/test-3d-coords-orbit.png)
 ---------
 
 ## Running
@@ -63,6 +63,27 @@ See `inputs/` directory for more, larger examples.
 
 - Use to calculate earth imagery percent-daily coverage given a certain focal length (thus field of view) of a lens.
 
+## More visuals
+
+![Equator and Cross](./img/equator-cross-orbits.png)
+![Polar](./img/polar-orbits.png)
+
+
+## 19-End April 2018 Programming Progress
+
+Loading of CSV config file (with orbital elements as values)
+
+Fixed some issues with `getECI_XYZ(...)`.
+
+Finding of occlusion (i.e. no line of sight) between satellites. (`O(N log N)`)
+
+Calculation of average line of sights and close passes.
+
+Location output to file.
+
+Live 3D visualization with Matplotlib (video export).
+
+
 ## 2 April 2018 Programming Progress
 
 Orbit simulation code done
@@ -83,9 +104,3 @@ Now doing stretch things (whatever we can do by the end).
 - Maybe model data production (e.g. pictures)
 - Take statistics
 - Track close approaches
-
-
-## More visuals
-
-![Equator and Cross](./img/equator-cross-orbits.png)
-![Polar](./img/polar-orbits.png)

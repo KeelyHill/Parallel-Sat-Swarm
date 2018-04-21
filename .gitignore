@@ -3,3 +3,4 @@
 *.out
 *.exe
 __pycache__
+*output.*
